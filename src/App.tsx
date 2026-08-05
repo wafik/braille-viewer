@@ -1,7 +1,7 @@
 import { useEffect, useCallback } from 'react'
 import { TextEditor } from './components/TextEditor'
 import { BrailleLine } from './components/BrailleLine'
-import { NavButton } from './components/NavigationControls'
+import { NavGroup } from './components/NavigationControls'
 import { useBrailleViewer } from './hooks/useBrailleViewer'
 import { initLiblouis } from './lib/liblouis'
 
@@ -63,17 +63,19 @@ export default function App() {
         <TextEditor onTextChange={handleTextChange} />
 
         <div className="space-y-2">
-          <div className="flex items-center gap-3">
-            <NavButton
-              onClick={scrollUp}
-              disabled={currentLineIndex === 0 || totalLines === 0}
-              direction="up"
+          <div className="flex items-center gap-4">
+            <NavGroup
+              onUp={scrollUp}
+              onDown={scrollDown}
+              upDisabled={currentLineIndex === 0 || totalLines === 0}
+              downDisabled={currentLineIndex >= totalLines - 1 || totalLines === 0}
             />
             <BrailleLine dots={currentDots} empty={totalLines === 0} />
-            <NavButton
-              onClick={scrollDown}
-              disabled={currentLineIndex >= totalLines - 1 || totalLines === 0}
-              direction="down"
+            <NavGroup
+              onUp={scrollUp}
+              onDown={scrollDown}
+              upDisabled={currentLineIndex === 0 || totalLines === 0}
+              downDisabled={currentLineIndex >= totalLines - 1 || totalLines === 0}
             />
           </div>
           {totalLines > 0 && (

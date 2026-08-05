@@ -11,12 +11,12 @@ export function BrailleLine({ dots, cellCount = 20, empty = false }: BrailleLine
 
   return (
     <div
-      className={`flex justify-center gap-1 p-4 bg-muted rounded-lg border ${empty ? 'opacity-30' : ''}`}
+      className={`flex justify-center gap-2 p-4 bg-muted rounded-lg border ${empty ? 'opacity-30' : ''}`}
       aria-label="Braille line display"
     >
       {padded.slice(0, cellCount).map((byte, i) => (
         <div key={i} data-testid="braille-cell">
-          <BrailleCell dotByte={byte} size="md" />
+          <BrailleCell dotByte={byte} size="lg" />
         </div>
       ))}
     </div>
