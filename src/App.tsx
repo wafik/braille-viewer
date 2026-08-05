@@ -32,11 +32,23 @@ export default function App() {
       } else if (e.key === 'ArrowDown') {
         e.preventDefault()
         scrollDown()
+      } else if (e.key === 'PageUp') {
+        e.preventDefault()
+        goToLine(Math.max(0, currentLineIndex - 10))
+      } else if (e.key === 'PageDown') {
+        e.preventDefault()
+        goToLine(Math.min(totalLines - 1, currentLineIndex + 10))
+      } else if (e.key === 'Home') {
+        e.preventDefault()
+        goToLine(0)
+      } else if (e.key === 'End') {
+        e.preventDefault()
+        goToLine(totalLines - 1)
       }
     }
     window.addEventListener('keydown', handleKeyDown)
     return () => window.removeEventListener('keydown', handleKeyDown)
-  }, [scrollUp, scrollDown])
+  }, [scrollUp, scrollDown, goToLine, currentLineIndex, totalLines])
 
   const currentDots = lines[currentLineIndex] ?? []
 
@@ -51,7 +63,7 @@ export default function App() {
         <TextEditor onTextChange={handleTextChange} />
 
         <div className="space-y-4">
-          <BrailleLine dots={currentDots} />
+          <BrailleLine dots={currentDots} empty={totalLines === 0} />
           <NavigationControls
             currentLine={currentLineIndex}
             totalLines={totalLines}
