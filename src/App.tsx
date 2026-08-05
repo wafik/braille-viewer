@@ -54,7 +54,7 @@ export default function App() {
 
   return (
     <div className="min-h-screen bg-background p-8">
-      <div className="max-w-2xl mx-auto space-y-6">
+      <div className="max-w-5xl mx-auto space-y-6">
         <h1 className="text-2xl font-bold">Braille Viewer</h1>
         <p className="text-muted-foreground">
           8-pin 20-cell braille display. Type text below and navigate with arrow keys.
@@ -63,7 +63,7 @@ export default function App() {
         <TextEditor onTextChange={handleTextChange} />
 
         <div className="space-y-2">
-          <div className="flex items-center gap-4">
+          <div className="flex items-center justify-center gap-4">
             <NavGroup
               onUp={scrollUp}
               onDown={scrollDown}
