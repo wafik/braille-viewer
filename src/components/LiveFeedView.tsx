@@ -3,9 +3,11 @@ import { TextEditor } from './TextEditor'
 import { BrailleLine } from './BrailleLine'
 import { NavGroup } from './NavigationControls'
 import { useLiveFeed } from '../hooks/useLiveFeed'
+import { dotsToUnicodeBraille } from '../lib/braille'
 
 export function LiveFeedView() {
   const {
+    dots,
     windowSlice,
     windowOffset,
     windowSize,
@@ -40,6 +42,8 @@ export function LiveFeedView() {
 
   const cellFrom = windowOffset + 1
   const cellTo = Math.min(windowOffset + windowSize, totalDots)
+  const fullBraille = dotsToUnicodeBraille(dots)
+  const windowBraille = dotsToUnicodeBraille(windowSlice)
 
   return (
     <div className="space-y-6">
@@ -80,6 +84,19 @@ export function LiveFeedView() {
           </div>
         )}
       </div>
+
+      {totalDots > 0 && (
+        <div className="space-y-3">
+          <div className="p-3 bg-muted rounded-lg border">
+            <p className="text-xs text-muted-foreground mb-1">Full braille ({totalDots} chars):</p>
+            <p className="text-lg font-mono break-all leading-relaxed">{fullBraille}</p>
+          </div>
+          <div className="p-3 bg-muted rounded-lg border">
+            <p className="text-xs text-muted-foreground mb-1">Window ({cellFrom}–{cellTo}):</p>
+            <p className="text-lg font-mono break-all leading-relaxed">{windowBraille}</p>
+          </div>
+        </div>
+      )}
 
       {totalDots === 0 && (
         <p className="text-center text-muted-foreground italic">
