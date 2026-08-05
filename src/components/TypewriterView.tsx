@@ -1,5 +1,6 @@
 import { useCallback } from 'react'
 import { BrailleLine } from './BrailleLine'
+import { NavGroup } from './NavigationControls'
 import { dotsToUnicodeBraille } from '../lib/braille'
 import { useTypewriter } from '../hooks/useTypewriter'
 
@@ -48,8 +49,27 @@ export function TypewriterView() {
         </p>
       </div>
 
-      <div className="flex items-center justify-center">
-        <BrailleLine dots={windowSlice} empty={totalDots === 0} />
+      <div className="space-y-2">
+        <div className="flex items-center justify-center gap-4">
+          <NavGroup
+            onUp={() => {}}
+            onDown={() => {}}
+            upDisabled={true}
+            downDisabled={true}
+          />
+          <BrailleLine dots={windowSlice} empty={totalDots === 0} />
+          <NavGroup
+            onUp={() => {}}
+            onDown={() => {}}
+            upDisabled={true}
+            downDisabled={true}
+          />
+        </div>
+        {totalDots > 0 && (
+          <p className="text-sm text-muted-foreground text-center">
+            {totalDots} braille chars
+          </p>
+        )}
       </div>
 
       {totalDots > 0 && (
