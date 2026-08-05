@@ -1,13 +1,15 @@
 import { useState, useEffect } from 'react'
 import { LiveFeedView } from './components/LiveFeedView'
 import { EditorView } from './components/EditorView'
+import { TypewriterView } from './components/TypewriterView'
 import { initLiblouis } from './lib/liblouis'
 
-type Tab = 'editor' | 'live-feed'
+type Tab = 'editor' | 'live-feed' | 'typewriter'
 
 const TABS: { id: Tab; label: string }[] = [
   { id: 'editor', label: 'Editor' },
   { id: 'live-feed', label: 'Live Feed' },
+  { id: 'typewriter', label: 'Typewriter' },
 ]
 
 export default function App() {
@@ -43,6 +45,7 @@ export default function App() {
 
         {activeTab === 'editor' && <EditorView />}
         {activeTab === 'live-feed' && <LiveFeedView />}
+        {activeTab === 'typewriter' && <TypewriterView />}
       </div>
     </div>
   )
