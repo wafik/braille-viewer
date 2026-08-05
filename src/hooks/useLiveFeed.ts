@@ -1,68 +1,70 @@
 import { useState, useCallback } from 'react'
-import { textToBrailleLines } from '../lib/textToBraille'
+import { textToBraille } from '../lib/liblouis'
+import { unicodeBrailleToDots } from '../lib/braille'
 
 interface UseLiveFeed {
-  lines: number[][]
-  currentLineIndex: number
-  totalLines: number
+  dots: number[]
+  windowSlice: number[]
+  windowOffset: number
+  windowSize: number
+  totalDots: number
   autoFollow: boolean
   scrollUp: () => void
   scrollDown: () => void
-  panLeft: () => void
-  panRight: () => void
   goHome: () => void
   setText: (text: string) => void
 }
 
-export function useLiveFeed(lineLength: number = 20): UseLiveFeed {
-  const [lines, setLines] = useState<number[][]>([])
-  const [currentLineIndex, setCurrentLineIndex] = useState(0)
+export function useLiveFeed(windowSize: number = 20): UseLiveFeed {
+  const [dots, setDots] = useState<number[]>([])
+  const [windowOffset, setWindowOffset] = useState(0)
   const [autoFollow, setAutoFollow] = useState(true)
 
-  const totalLines = lines.length
+  const totalDots = dots.length
+  const maxOffset = Math.max(0, totalDots - windowSize)
+
+  const resolveOffset = useCallback((dotsLen: number, follow: boolean, currentOffset: number): number => {
+    if (follow) {
+      return Math.max(0, dotsLen - windowSize)
+    }
+    return Math.max(0, Math.min(currentOffset, Math.max(0, dotsLen - windowSize)))
+  }, [windowSize])
 
   const setText = useCallback((text: string) => {
-    const newLines = textToBrailleLines(text, lineLength)
-    setLines(newLines)
-    if (autoFollow) {
-      setCurrentLineIndex(Math.max(0, newLines.length - 1))
-    }
-  }, [lineLength, autoFollow])
+    const braille = textToBraille(text)
+    const newDots = unicodeBrailleToDots(braille)
+    setDots(newDots)
+    setAutoFollow(true)
+    setWindowOffset(resolveOffset(newDots.length, true, 0))
+  }, [resolveOffset])
 
   const scrollUp = useCallback(() => {
     setAutoFollow(false)
-    setCurrentLineIndex(prev => Math.max(0, prev - 1))
+    setWindowOffset(prev => Math.max(0, prev - 1))
   }, [])
 
   const scrollDown = useCallback(() => {
     setAutoFollow(false)
-    setCurrentLineIndex(prev => Math.min(totalLines - 1, prev + 1))
-  }, [totalLines])
-
-  const panLeft = useCallback(() => {
-    setAutoFollow(false)
-    setCurrentLineIndex(prev => Math.max(0, prev - 20))
-  }, [])
-
-  const panRight = useCallback(() => {
-    setAutoFollow(false)
-    setCurrentLineIndex(prev => Math.min(totalLines - 1, prev + 20))
-  }, [totalLines])
+    setWindowOffset(prev => Math.min(maxOffset, prev + 1))
+  }, [maxOffset])
 
   const goHome = useCallback(() => {
     setAutoFollow(true)
-    setCurrentLineIndex(Math.max(0, totalLines - 1))
-  }, [totalLines])
+    setWindowOffset(maxOffset)
+  }, [maxOffset])
+
+  const slice = dots.slice(windowOffset, windowOffset + windowSize)
+  const windowSlice = [...slice, ...Array(Math.max(0, windowSize - slice.length)).fill(0)]
 
   return {
-    lines,
-    currentLineIndex,
-    totalLines,
+    dots,
+    windowSlice,
+    windowOffset,
+    windowSize,
+    totalDots,
     autoFollow,
     scrollUp,
     scrollDown,
-    panLeft,
-    panRight,
     goHome,
     setText,
   }

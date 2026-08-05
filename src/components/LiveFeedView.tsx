@@ -6,9 +6,10 @@ import { useLiveFeed } from '../hooks/useLiveFeed'
 
 export function LiveFeedView() {
   const {
-    lines,
-    currentLineIndex,
-    totalLines,
+    windowSlice,
+    windowOffset,
+    windowSize,
+    totalDots,
     autoFollow,
     scrollUp,
     scrollDown,
@@ -37,7 +38,8 @@ export function LiveFeedView() {
     return () => window.removeEventListener('keydown', handleKeyDown)
   }, [scrollUp, scrollDown, goHome])
 
-  const currentDots = lines[currentLineIndex] ?? []
+  const cellFrom = windowOffset + 1
+  const cellTo = Math.min(windowOffset + windowSize, totalDots)
 
   return (
     <div className="space-y-6">
@@ -48,21 +50,21 @@ export function LiveFeedView() {
           <NavGroup
             onUp={scrollUp}
             onDown={scrollDown}
-            upDisabled={currentLineIndex === 0 || totalLines === 0}
-            downDisabled={currentLineIndex >= totalLines - 1 || totalLines === 0}
+            upDisabled={windowOffset === 0 || totalDots === 0}
+            downDisabled={windowOffset >= Math.max(0, totalDots - windowSize) || totalDots === 0}
           />
-          <BrailleLine dots={currentDots} empty={totalLines === 0} />
+          <BrailleLine dots={windowSlice} empty={totalDots === 0} />
           <NavGroup
             onUp={scrollUp}
             onDown={scrollDown}
-            upDisabled={currentLineIndex === 0 || totalLines === 0}
-            downDisabled={currentLineIndex >= totalLines - 1 || totalLines === 0}
+            upDisabled={windowOffset === 0 || totalDots === 0}
+            downDisabled={windowOffset >= Math.max(0, totalDots - windowSize) || totalDots === 0}
           />
         </div>
-        {totalLines > 0 && (
+        {totalDots > 0 && (
           <div className="flex items-center justify-center gap-4">
             <p className="text-sm text-muted-foreground">
-              Line {currentLineIndex + 1} of {totalLines}
+              Cells {cellFrom}–{cellTo} of {totalDots}
             </p>
             <span className={`text-xs px-2 py-0.5 rounded ${autoFollow ? 'bg-green-100 text-green-700' : 'bg-yellow-100 text-yellow-700'}`}>
               {autoFollow ? 'Auto-follow ON' : 'Auto-follow OFF'}
@@ -79,7 +81,7 @@ export function LiveFeedView() {
         )}
       </div>
 
-      {totalLines === 0 && (
+      {totalDots === 0 && (
         <p className="text-center text-muted-foreground italic">
           Type or paste text — display follows the end automatically...
         </p>
