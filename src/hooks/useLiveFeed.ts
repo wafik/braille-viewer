@@ -40,13 +40,13 @@ export function useLiveFeed(windowSize: number = 20): UseLiveFeed {
 
   const scrollUp = useCallback(() => {
     setAutoFollow(false)
-    setWindowOffset(prev => Math.max(0, prev - 1))
-  }, [])
+    setWindowOffset(prev => Math.max(0, prev - windowSize))
+  }, [windowSize])
 
   const scrollDown = useCallback(() => {
     setAutoFollow(false)
-    setWindowOffset(prev => Math.min(maxOffset, prev + 1))
-  }, [maxOffset])
+    setWindowOffset(prev => Math.min(maxOffset, prev + windowSize))
+  }, [maxOffset, windowSize])
 
   const goHome = useCallback(() => {
     setAutoFollow(true)
