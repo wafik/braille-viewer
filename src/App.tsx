@@ -14,9 +14,17 @@ const TABS: { id: Tab; label: string }[] = [
 
 export default function App() {
   const [activeTab, setActiveTab] = useState<Tab>('editor')
+  const [status, setStatus] = useState<'loading' | 'ready' | 'error'>('loading')
+  const [error, setError] = useState('')
 
   useEffect(() => {
-    initLiblouis().catch(console.error)
+    initLiblouis().then(
+      () => setStatus('ready'),
+      (err: unknown) => {
+        setError(err instanceof Error ? err.message : String(err))
+        setStatus('error')
+      },
+    )
   }, [])
 
   return (
@@ -43,9 +51,22 @@ export default function App() {
           ))}
         </div>
 
-        {activeTab === 'editor' && <EditorView />}
-        {activeTab === 'live-feed' && <LiveFeedView />}
-        {activeTab === 'typewriter' && <TypewriterView />}
+        {status === 'loading' && (
+          <p className="text-muted-foreground italic">Loading braille tables…</p>
+        )}
+        {status === 'error' && (
+          <p role="alert" className="text-red-600">
+            Failed to load liblouis: {error}
+          </p>
+        )}
+
+        {status === 'ready' && (
+          <>
+            {activeTab === 'editor' && <EditorView />}
+            {activeTab === 'live-feed' && <LiveFeedView />}
+            {activeTab === 'typewriter' && <TypewriterView />}
+          </>
+        )}
       </div>
     </div>
   )

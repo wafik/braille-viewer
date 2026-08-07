@@ -14,6 +14,15 @@ describe('unicodeBrailleToDots', () => {
     const result = unicodeBrailleToDots('⠃⠁')
     expect(result).toEqual([3, 1])
   })
+
+  it('maps an ASCII space to a blank cell', () => {
+    // liblouis emits U+0020 between words, not U+2800.
+    expect(unicodeBrailleToDots('⠁ ⠃')).toEqual([1, 0, 3])
+  })
+
+  it('maps any non-braille code point to a blank cell', () => {
+    expect(unicodeBrailleToDots('a\n')).toEqual([0, 0])
+  })
 })
 
 describe('dotsToUnicodeBraille', () => {

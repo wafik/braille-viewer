@@ -8,6 +8,12 @@ importers:
 
   .:
     dependencies:
+      liblouis:
+        specifier: ^0.4.0
+        version: 0.4.0
+      liblouis-build:
+        specifier: 3.2.0-rc
+        version: 3.2.0-rc
       react:
         specifier: ^19.0.0
         version: 19.2.8
@@ -894,6 +900,12 @@ packages:
     resolution: {integrity: sha512-XmOWe7eyHYH14cLdVPoyg+GOH3rYX++KpzrylJwSW98t3Nk+U8XOl8FWKOgwtzdb8lXGf6zYwDUzeHMWfxasyg==}
     engines: {node: '>=6'}
     hasBin: true
+
+  liblouis-build@3.2.0-rc:
+    resolution: {integrity: sha512-wRQKhsc0RXDrOQbRN67qvKdN5facgINMYu7Ot0VMvNIawVHTxdkIfjjC7aq1jrtrwdbMAvMSP3nttq+I4p/A4Q==}
+
+  liblouis@0.4.0:
+    resolution: {integrity: sha512-ViuoMFbSbf39RyXYU/Q9IeQ5IYUdJVPrgz5nmXjkNkK5rmorivDDWRZLibPhEaip0Dpt00CG+NX1WQGHWCa+ow==}
 
   lightningcss-android-arm64@1.32.0:
     resolution: {integrity: sha512-YK7/ClTt4kAK0vo6w3X+Pnm0D2cf2vPHbhOXdoNti1Ga0al1P4TBZhwjATvjNwLEBCnKvjJc2jQgHXH0NEwlAg==}
@@ -1974,6 +1986,12 @@ snapshots:
   jsesc@3.1.0: {}
 
   json5@2.2.3: {}
+
+  liblouis-build@3.2.0-rc: {}
+
+  liblouis@0.4.0:
+    dependencies:
+      liblouis-build: 3.2.0-rc
 
   lightningcss-android-arm64@1.32.0:
     optional: true
