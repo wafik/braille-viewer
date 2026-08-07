@@ -3,6 +3,7 @@ import { TextEditor } from './TextEditor'
 import { BrailleLine } from './BrailleLine'
 import { NavGroup } from './NavigationControls'
 import { useBrailleViewer } from '../hooks/useBrailleViewer'
+import { useDemoPlayback } from '../hooks/useDemoPlayback'
 
 export function EditorView() {
   const {
@@ -18,6 +19,8 @@ export function EditorView() {
   const handleTextChange = useCallback((text: string) => {
     setText(text)
   }, [setText])
+
+  const { transcript, isRunning, run: runDemo } = useDemoPlayback(setText)
 
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
@@ -50,6 +53,16 @@ export function EditorView() {
   return (
     <div className="space-y-6">
       <TextEditor onTextChange={handleTextChange} />
+      <div className="flex items-center gap-2">
+        <button
+          onClick={runDemo}
+          disabled={isRunning}
+          className="px-3 py-2 text-sm font-medium border rounded-lg hover:bg-muted disabled:opacity-50 disabled:cursor-not-allowed"
+        >
+          {isRunning ? 'Running…' : 'Run Demo'}
+        </button>
+        {transcript && <p className="text-sm text-muted-foreground italic">"{transcript}"</p>}
+      </div>
 
       <div className="space-y-2">
         <div className="flex items-center justify-center gap-4">

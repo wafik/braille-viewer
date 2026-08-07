@@ -1,30 +1,53 @@
-import { useEffect, useCallback } from 'react'
-import { TextEditor } from './TextEditor'
+import { useCallback, useEffect, useState } from 'react'
 import { BrailleLine } from './BrailleLine'
 import { NavGroup } from './NavigationControls'
-import { useLiveFeed } from '../hooks/useLiveFeed'
-import { dotsToUnicodeBraille } from '../lib/braille'
-import { useDemoPlayback } from '../hooks/useDemoPlayback'
+import { useRemoteFeed, type RemoteFeedStatus } from '../hooks/useRemoteFeed'
 
-export function LiveFeedView() {
+const STORAGE_KEY = 'braille-viewer:remote-host'
+
+const STATUS_LABEL: Record<RemoteFeedStatus, string> = {
+  idle: 'Not connected',
+  connecting: 'Connecting…',
+  connected: 'Connected',
+  error: 'Connection error',
+}
+
+const STATUS_STYLE: Record<RemoteFeedStatus, string> = {
+  idle: 'bg-gray-100 text-gray-700',
+  connecting: 'bg-yellow-100 text-yellow-700',
+  connected: 'bg-green-100 text-green-700',
+  error: 'bg-red-100 text-red-700',
+}
+
+export function RemoteFeedView() {
+  const [host, setHost] = useState(() => localStorage.getItem(STORAGE_KEY) ?? 'localhost:8765')
   const {
-    dots,
+    status,
     windowSlice,
     windowOffset,
     windowSize,
     totalDots,
     autoFollow,
+    history,
+    connect,
+    disconnect,
     scrollUp,
     scrollDown,
     goHome,
-    setText,
-  } = useLiveFeed()
+  } = useRemoteFeed()
+  const isLive = status === 'connected' || status === 'connecting'
 
-  const handleTextChange = useCallback((text: string) => {
-    setText(text)
-  }, [setText])
+  useEffect(() => {
+    localStorage.setItem(STORAGE_KEY, host.trim())
+  }, [host])
 
-  const { transcript, isRunning, run: runDemo } = useDemoPlayback(setText)
+  const handleToggle = useCallback(() => {
+    if (isLive) {
+      disconnect()
+      return
+    }
+    connect(host.trim())
+  }, [isLive, host, connect, disconnect])
 
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
@@ -45,20 +68,29 @@ export function LiveFeedView() {
 
   const cellFrom = windowOffset + 1
   const cellTo = Math.min(windowOffset + windowSize, totalDots)
-  const fullBraille = dotsToUnicodeBraille(dots)
 
   return (
     <div className="space-y-6">
-      <TextEditor onTextChange={handleTextChange} />
       <div className="flex items-center gap-2">
+        <label htmlFor="remote-host" className="text-sm font-medium">
+          Daemon address
+        </label>
+        <input
+          id="remote-host"
+          value={host}
+          onChange={(e) => setHost(e.target.value)}
+          placeholder="192.168.1.42:8765"
+          className="flex-1 p-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+        />
         <button
-          onClick={runDemo}
-          disabled={isRunning}
-          className="px-3 py-2 text-sm font-medium border rounded-lg hover:bg-muted disabled:opacity-50 disabled:cursor-not-allowed"
+          onClick={handleToggle}
+          className="px-4 py-2 text-sm font-medium border rounded-lg hover:bg-muted"
         >
-          {isRunning ? 'Running…' : 'Run Demo'}
+          {isLive ? 'Disconnect' : 'Connect'}
         </button>
-        {transcript && <p className="text-sm text-muted-foreground italic">"{transcript}"</p>}
+        <span className={`text-xs px-2 py-0.5 rounded ${STATUS_STYLE[status]}`}>
+          {STATUS_LABEL[status]}
+        </span>
       </div>
 
       <div className="space-y-2">
@@ -97,17 +129,21 @@ export function LiveFeedView() {
         )}
       </div>
 
-      {totalDots > 0 && (
-        <div className="p-3 bg-muted rounded-lg border">
-          <p className="text-xs text-muted-foreground mb-1">Full braille ({totalDots} chars):</p>
-          <p className="text-lg font-mono break-all leading-relaxed">{fullBraille}</p>
-        </div>
-      )}
-
       {totalDots === 0 && (
         <p className="text-center text-muted-foreground italic">
-          Type or paste text — display follows the end automatically...
+          Enter the daemon's ws://host:port and press Connect — live braille output appears here.
         </p>
+      )}
+
+      {history.length > 0 && (
+        <div className="p-3 bg-muted rounded-lg border space-y-1">
+          <p className="text-xs text-muted-foreground mb-1">
+            Recent sentences ({history.length}):
+          </p>
+          {history.map((line, i) => (
+            <p key={i} className="text-sm">{line}</p>
+          ))}
+        </div>
       )}
     </div>
   )

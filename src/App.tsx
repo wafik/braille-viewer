@@ -2,14 +2,16 @@ import { useState, useEffect } from 'react'
 import { LiveFeedView } from './components/LiveFeedView'
 import { EditorView } from './components/EditorView'
 import { TypewriterView } from './components/TypewriterView'
+import { RemoteFeedView } from './components/RemoteFeedView'
 import { initLiblouis } from './lib/liblouis'
 
-type Tab = 'editor' | 'live-feed' | 'typewriter'
+type Tab = 'editor' | 'live-feed' | 'typewriter' | 'remote'
 
 const TABS: { id: Tab; label: string }[] = [
   { id: 'editor', label: 'Editor' },
   { id: 'live-feed', label: 'Live Feed' },
   { id: 'typewriter', label: 'Typewriter' },
+  { id: 'remote', label: 'Remote' },
 ]
 
 export default function App() {
@@ -65,6 +67,7 @@ export default function App() {
             {activeTab === 'editor' && <EditorView />}
             {activeTab === 'live-feed' && <LiveFeedView />}
             {activeTab === 'typewriter' && <TypewriterView />}
+            {activeTab === 'remote' && <RemoteFeedView />}
           </>
         )}
       </div>
