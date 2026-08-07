@@ -1,3 +1,8 @@
+export interface CellGroup {
+  label: string
+  dots: number[]
+}
+
 export const BLANK_BRAILLE_CELL = 0x2800
 
 const LAST_BRAILLE_CELL = 0x28FF

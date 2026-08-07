@@ -3,15 +3,19 @@ import { LiveFeedView } from './components/LiveFeedView'
 import { EditorView } from './components/EditorView'
 import { TypewriterView } from './components/TypewriterView'
 import { RemoteFeedView } from './components/RemoteFeedView'
+import { PerCellView } from './components/PerCellView'
+import { PerWordView } from './components/PerWordView'
 import { initLiblouis } from './lib/liblouis'
 
-type Tab = 'editor' | 'live-feed' | 'typewriter' | 'remote'
+type Tab = 'editor' | 'live-feed' | 'typewriter' | 'remote' | 'per-cell' | 'per-word'
 
 const TABS: { id: Tab; label: string }[] = [
   { id: 'editor', label: 'Editor' },
   { id: 'live-feed', label: 'Live Feed' },
   { id: 'typewriter', label: 'Typewriter' },
   { id: 'remote', label: 'Remote' },
+  { id: 'per-cell', label: 'Per Cell' },
+  { id: 'per-word', label: 'Per Word' },
 ]
 
 export default function App() {
@@ -68,6 +72,8 @@ export default function App() {
             {activeTab === 'live-feed' && <LiveFeedView />}
             {activeTab === 'typewriter' && <TypewriterView />}
             {activeTab === 'remote' && <RemoteFeedView />}
+            {activeTab === 'per-cell' && <PerCellView />}
+            {activeTab === 'per-word' && <PerWordView />}
           </>
         )}
       </div>

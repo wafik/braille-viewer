@@ -28,6 +28,12 @@ export const BRAILLE_TABLES = {
 
 export type BrailleLanguage = keyof typeof BRAILLE_TABLES
 
+// Uncontracted (grade 1) English table: dot patterns for plain a-z/punctuation
+// are the same across UEB locales, so this gives a language-agnostic,
+// (mostly) one-character-per-cell mapping for the "per cell" demo view —
+// grade 2's word/phrase contractions make that alignment meaningless there.
+const GRADE1_TABLE = 'tables/unicode.dis,tables/en-ueb-g1.ctb'
+
 let language: BrailleLanguage = 'id'
 
 export function setLanguage(next: BrailleLanguage): void {
@@ -81,7 +87,7 @@ async function load(): Promise<void> {
     FS.writeFile(`/tables/${name}`, encoder.encode(source), { encoding: 'binary' })
   }
 
-  for (const table of Object.values(BRAILLE_TABLES)) {
+  for (const table of [...Object.values(BRAILLE_TABLES), GRADE1_TABLE]) {
     if (instance.translateString(table, 'a') === null) {
       throw new Error(`liblouis could not compile ${table}`)
     }
@@ -105,6 +111,15 @@ export function textToBraille(text: string, lang: BrailleLanguage = language): s
   if (!text) return ''
   if (!api) throw new Error('liblouis not initialised — await initLiblouis() first')
   const out = api.translateString(BRAILLE_TABLES[lang], text)
+  if (out === null) throw new Error('liblouis translation failed')
+  return out
+}
+
+/** Uncontracted grade-1 translation — see GRADE1_TABLE for why. */
+export function textToBrailleG1(text: string): string {
+  if (!text) return ''
+  if (!api) throw new Error('liblouis not initialised — await initLiblouis() first')
+  const out = api.translateString(GRADE1_TABLE, text)
   if (out === null) throw new Error('liblouis translation failed')
   return out
 }
