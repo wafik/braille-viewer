@@ -3,7 +3,7 @@ import { TextEditor } from './TextEditor'
 import { BrailleLine } from './BrailleLine'
 import { NavGroup } from './NavigationControls'
 import { useDemoPlayback } from '../hooks/useDemoPlayback'
-import { useGroupStepper } from '../hooks/useGroupStepper'
+import { useSpelledLine } from '../hooks/useSpelledLine'
 import { buildPerCellGroups } from '../lib/perCellBraille'
 
 // ponytail: character-spelling pace; tune here if it feels too fast/slow.
@@ -14,11 +14,20 @@ export function PerCellView() {
   const { transcript, isRunning, run: runDemo } = useDemoPlayback(setText)
 
   const groups = useMemo(() => buildPerCellGroups(text), [text])
-  const { currentIndex, isPlaying, stepPrev, stepNext, resume, reset } = useGroupStepper(groups.length, STEP_INTERVAL_MS)
+  const {
+    windowSlice,
+    windowSize,
+    totalGroups,
+    currentGroupIndex,
+    visibleLabels,
+    isPlaying,
+    stepPrev,
+    stepNext,
+    resume,
+    reset,
+  } = useSpelledLine(groups, STEP_INTERVAL_MS)
 
-  const totalGroups = groups.length
-  const currentGroup = groups[currentIndex]
-  const currentLabel = currentGroup ? (currentGroup.label === '' ? '(space)' : currentGroup.label) : ''
+  const visibleText = visibleLabels.map(label => (label === '' ? ' ' : label)).join('')
 
   const handleRunDemo = () => {
     reset()
@@ -44,25 +53,21 @@ export function PerCellView() {
           <NavGroup
             onUp={stepPrev}
             onDown={stepNext}
-            upDisabled={currentIndex === 0 || totalGroups === 0}
-            downDisabled={currentIndex >= totalGroups - 1 || totalGroups === 0}
+            upDisabled={currentGroupIndex === 0 || totalGroups === 0}
+            downDisabled={currentGroupIndex >= totalGroups - 1 || totalGroups === 0}
           />
-          <BrailleLine
-            dots={currentGroup?.dots ?? []}
-            cellCount={Math.max(1, currentGroup?.dots.length ?? 1)}
-            empty={totalGroups === 0}
-          />
+          <BrailleLine dots={windowSlice} cellCount={windowSize} empty={totalGroups === 0} />
           <NavGroup
             onUp={stepPrev}
             onDown={stepNext}
-            upDisabled={currentIndex === 0 || totalGroups === 0}
-            downDisabled={currentIndex >= totalGroups - 1 || totalGroups === 0}
+            upDisabled={currentGroupIndex === 0 || totalGroups === 0}
+            downDisabled={currentGroupIndex >= totalGroups - 1 || totalGroups === 0}
           />
         </div>
         {totalGroups > 0 && (
           <div className="flex items-center justify-center gap-4">
             <p className="text-sm text-muted-foreground">
-              Character {currentIndex + 1} of {totalGroups} (grade 1, spelled out)
+              Character {currentGroupIndex + 1} of {totalGroups} (grade 1, spelled out)
             </p>
             <span className={`text-xs px-2 py-0.5 rounded ${isPlaying ? 'bg-green-100 text-green-700' : 'bg-yellow-100 text-yellow-700'}`}>
               {isPlaying ? 'Spelling…' : 'Paused'}
@@ -81,8 +86,8 @@ export function PerCellView() {
 
       {totalGroups > 0 && (
         <div className="p-3 bg-muted rounded-lg border">
-          <p className="text-xs text-muted-foreground mb-1">Current character:</p>
-          <p className="text-lg font-mono">{currentLabel}</p>
+          <p className="text-xs text-muted-foreground mb-1">Current line's text:</p>
+          <p className="text-lg font-mono">{visibleText}</p>
         </div>
       )}
 

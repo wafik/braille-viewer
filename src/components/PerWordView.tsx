@@ -3,7 +3,7 @@ import { TextEditor } from './TextEditor'
 import { BrailleLine } from './BrailleLine'
 import { NavGroup } from './NavigationControls'
 import { useDemoPlayback } from '../hooks/useDemoPlayback'
-import { useGroupStepper } from '../hooks/useGroupStepper'
+import { useSpelledLine } from '../hooks/useSpelledLine'
 import { buildPerWordGroups } from '../lib/perWordBraille'
 
 // ponytail: word-spelling pace, a bit slower than per-cell since a word is
@@ -15,10 +15,20 @@ export function PerWordView() {
   const { transcript, isRunning, run: runDemo } = useDemoPlayback(setText)
 
   const groups = useMemo(() => buildPerWordGroups(text), [text])
-  const { currentIndex, isPlaying, stepPrev, stepNext, resume, reset } = useGroupStepper(groups.length, STEP_INTERVAL_MS)
+  const {
+    windowSlice,
+    windowSize,
+    totalGroups,
+    currentGroupIndex,
+    visibleLabels,
+    isPlaying,
+    stepPrev,
+    stepNext,
+    resume,
+    reset,
+  } = useSpelledLine(groups, STEP_INTERVAL_MS)
 
-  const totalGroups = groups.length
-  const currentGroup = groups[currentIndex]
+  const visibleText = visibleLabels.join(' ')
 
   const handleRunDemo = () => {
     reset()
@@ -44,25 +54,21 @@ export function PerWordView() {
           <NavGroup
             onUp={stepPrev}
             onDown={stepNext}
-            upDisabled={currentIndex === 0 || totalGroups === 0}
-            downDisabled={currentIndex >= totalGroups - 1 || totalGroups === 0}
+            upDisabled={currentGroupIndex === 0 || totalGroups === 0}
+            downDisabled={currentGroupIndex >= totalGroups - 1 || totalGroups === 0}
           />
-          <BrailleLine
-            dots={currentGroup?.dots ?? []}
-            cellCount={Math.max(1, currentGroup?.dots.length ?? 1)}
-            empty={totalGroups === 0}
-          />
+          <BrailleLine dots={windowSlice} cellCount={windowSize} empty={totalGroups === 0} />
           <NavGroup
             onUp={stepPrev}
             onDown={stepNext}
-            upDisabled={currentIndex === 0 || totalGroups === 0}
-            downDisabled={currentIndex >= totalGroups - 1 || totalGroups === 0}
+            upDisabled={currentGroupIndex === 0 || totalGroups === 0}
+            downDisabled={currentGroupIndex >= totalGroups - 1 || totalGroups === 0}
           />
         </div>
         {totalGroups > 0 && (
           <div className="flex items-center justify-center gap-4">
             <p className="text-sm text-muted-foreground">
-              Word {currentIndex + 1} of {totalGroups} (grade 2, spelled out)
+              Word {currentGroupIndex + 1} of {totalGroups} (grade 2, spelled out)
             </p>
             <span className={`text-xs px-2 py-0.5 rounded ${isPlaying ? 'bg-green-100 text-green-700' : 'bg-yellow-100 text-yellow-700'}`}>
               {isPlaying ? 'Spelling…' : 'Paused'}
@@ -81,8 +87,8 @@ export function PerWordView() {
 
       {totalGroups > 0 && (
         <div className="p-3 bg-muted rounded-lg border">
-          <p className="text-xs text-muted-foreground mb-1">Current word:</p>
-          <p className="text-lg font-mono">{currentGroup?.label}</p>
+          <p className="text-xs text-muted-foreground mb-1">Current line's word(s):</p>
+          <p className="text-lg font-mono">{visibleText}</p>
         </div>
       )}
 
