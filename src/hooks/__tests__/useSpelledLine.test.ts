@@ -43,6 +43,18 @@ describe('useSpelledLine', () => {
     expect(result.current.visibleLabels).toEqual(['b', 'c'])
   })
 
+  it('inserts separator cells between groups when separatorCells is set', () => {
+    const groups = groupsOf(['a', 'b'], 2)
+    const { result } = renderHook(() => useSpelledLine(groups, 100, 20, 1))
+
+    expect(result.current.windowSlice.slice(0, 3)).toEqual([1, 1, 0])
+    expect(result.current.visibleLabels).toEqual(['a'])
+
+    act(() => vi.advanceTimersByTime(100))
+    expect(result.current.windowSlice.slice(0, 5)).toEqual([1, 1, 0, 1, 1])
+    expect(result.current.visibleLabels).toEqual(['a', 'b'])
+  })
+
   it('stepNext/stepPrev pause autoplay and move by one group', () => {
     const groups = groupsOf(['a', 'b', 'c'], 2)
     const { result } = renderHook(() => useSpelledLine(groups, 100, 20))

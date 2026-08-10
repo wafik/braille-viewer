@@ -26,7 +26,7 @@ export function PerWordView() {
     stepNext,
     resume,
     reset,
-  } = useSpelledLine(groups, STEP_INTERVAL_MS)
+  } = useSpelledLine(groups, STEP_INTERVAL_MS, 20, 1)
 
   const visibleText = visibleLabels.join(' ')
 
